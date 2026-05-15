@@ -17,12 +17,13 @@ Provide the full updated file contents for every file that changed.
 Never provide partial diffs only — always give the complete file so it can be copy-pasted.
 
 ### 2. Version Summary (รายละเอียดการแก้ไข)
-After the code, include a bulleted list **in Thai** describing what changed:
+After the code, include a bulleted list describing what changed.  
+**Thai** for the summary labels and descriptions. **English** is fine for file names, technical terms, and git commit messages.
 
 ```
 ## รายละเอียดการแก้ไข — vX.Y.Z
 
-- [ชื่อไฟล์] — สิ่งที่เปลี่ยนแปลง
+- [filename] — what changed (Thai description)
 - ...
 ```
 
