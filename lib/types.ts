@@ -14,6 +14,7 @@ export interface Category {
 }
 
 export type Screen =
+  | 'landing'
   | 'home'
   | 'mode-select'
   | 'round-select'

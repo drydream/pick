@@ -13,6 +13,7 @@ import GameCameraScreen from '@/components/GameCameraScreen'
 import ResultScreen from '@/components/ResultScreen'
 import ManageCategoriesScreen from '@/components/ManageCategoriesScreen'
 import AddCategoryModal from '@/components/AddCategoryModal'
+import LandingScreen from '@/components/LandingScreen'
 
 const slide = {
   enter: (dir: number) => ({ x: dir > 0 ? '100%' : '-100%', opacity: 0 }),
@@ -27,9 +28,10 @@ const fade = {
 }
 
 const GAME_SCREENS: Screen[] = ['game-normal', 'game-camera']
+const NO_TOPBAR_SCREENS: Screen[] = ['game-normal', 'game-camera', 'landing']
 
 export default function Home() {
-  const [screen, setScreen]           = useState<Screen>('home')
+  const [screen, setScreen]           = useState<Screen>('landing')
   const [dir, setDir]                 = useState(1)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [addCatOpen, setAddCatOpen]   = useState(false)
@@ -167,6 +169,7 @@ export default function Home() {
 
   const allCategories = [...DEFAULT_CATEGORIES, ...customCats]
   const isGameScreen  = GAME_SCREENS.includes(screen)
+  const showTopBar    = !NO_TOPBAR_SCREENS.includes(screen)
 
   const categoryMaxItems = selectedCat
     ? (selectedCat.items?.length ?? selectedCat.pairs.flat().length)
@@ -212,7 +215,7 @@ export default function Home() {
       </AnimatePresence>
 
       <AnimatePresence>
-        {!isGameScreen && (
+        {showTopBar && (
           <motion.div key="topbar"
             initial={{ y: -56 }} animate={{ y: 0 }} exit={{ y: -56 }}
             transition={{ type: 'tween', duration: 0.22 }}
@@ -225,6 +228,16 @@ export default function Home() {
 
       <div className="flex-1 relative overflow-hidden">
         <AnimatePresence mode="wait" custom={dir}>
+
+          {screen === 'landing' && (
+            <motion.div key="landing"
+              custom={dir} variants={fade} initial="enter" animate="center" exit="exit"
+              transition={{ duration: 0.3 }}
+              className="absolute inset-0"
+            >
+              <LandingScreen onStart={() => navigate('home')} />
+            </motion.div>
+          )}
 
           {screen === 'home' && (
             <motion.div key="home"
