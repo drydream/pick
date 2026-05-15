@@ -13,14 +13,13 @@ import GameCameraScreen from '@/components/GameCameraScreen'
 import ResultScreen from '@/components/ResultScreen'
 import AddCategoryModal from '@/components/AddCategoryModal'
 
-// Non-game screens use a slide transition
 const slide = {
   enter: (dir: number) => ({ x: dir > 0 ? '100%' : '-100%', opacity: 0 }),
   center: { x: 0, opacity: 1 },
   exit:  (dir: number) => ({ x: dir < 0 ? '100%' : '-100%', opacity: 0 }),
 }
 
-// Game screens use a fast fade so per-half animations inside the component are visible
+// Game screens use fast fade so the per-half enter animations inside the component shine
 const fade = {
   enter: () => ({ opacity: 0 }),
   center: { opacity: 1 },
@@ -30,22 +29,25 @@ const fade = {
 const GAME_SCREENS: Screen[] = ['game-normal', 'game-camera']
 
 export default function Home() {
-  const [screen, setScreen]         = useState<Screen>('home')
-  const [dir, setDir]               = useState(1)
+  const [screen, setScreen]           = useState<Screen>('home')
+  const [dir, setDir]                 = useState(1)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [addCatOpen, setAddCatOpen]   = useState(false)
   const [selectedCat, setSelectedCat] = useState<Category | null>(null)
   const [selectedMode, setSelectedMode] = useState<'normal' | 'camera'>('normal')
-  const [coins, setCoins]           = useState(0)
-  const [customCats, setCustomCats] = useState<Category[]>([])
+  const [coins, setCoins]             = useState(0)
+  const [customCats, setCustomCats]   = useState<Category[]>([])
 
   // ── Survivor game state ────────────────────────────────────────────
-  const [gameItems, setGameItems]         = useState<string[]>([])
-  const [currentWinner, setCurrentWinner] = useState('')
-  const [nextChallenger, setNextChallenger] = useState('')
-  const [currentIndex, setCurrentIndex]   = useState(2)   // next item slot to bring in
-  const [totalItems, setTotalItems]       = useState(5)
-  const [winHistory, setWinHistory]       = useState<string[]>([])
+  const [gameItems, setGameItems]             = useState<string[]>([])
+  const [currentWinner, setCurrentWinner]     = useState('')
+  const [nextChallenger, setNextChallenger]   = useState('')
+  const [currentIndex, setCurrentIndex]       = useState(2)
+  const [totalItems, setTotalItems]           = useState(5)
+  const [winHistory, setWinHistory]           = useState<string[]>([])
+  // Color tracks the ITEM, not the position — winner keeps its color when it moves up
+  const [winnerColor, setWinnerColor]                 = useState<'red' | 'blue'>('red')
+  const [winnerCameFromBottom, setWinnerCameFromBottom] = useState(false)
   // ──────────────────────────────────────────────────────────────────
 
   useEffect(() => {
@@ -76,14 +78,15 @@ export default function Home() {
 
   const handleRoundSelect = (itemCount: number) => {
     if (!selectedCat) return
-    // Flatten all pairs into a flat item list, then slice to requested count
     const items = selectedCat.pairs.flat().slice(0, itemCount)
     setGameItems(items)
     setCurrentWinner(items[0])
     setNextChallenger(items[1])
-    setCurrentIndex(2)   // next item to challenge starts at index 2
+    setCurrentIndex(2)
     setTotalItems(itemCount)
     setWinHistory([])
+    setWinnerColor('red')           // item[0] always starts red
+    setWinnerCameFromBottom(false)
     navigate(selectedMode === 'camera' ? 'game-camera' : 'game-normal')
   }
 
@@ -95,12 +98,20 @@ export default function Home() {
     setCoins(newCoins)
     try { localStorage.setItem('pick_coins', String(newCoins)) } catch {}
 
+    const challengerWon = item === nextChallenger
+
+    // Color follows the winner: if challenger (opposite color) wins, flip
+    const newWinnerColor: 'red' | 'blue' = challengerWon
+      ? (winnerColor === 'red' ? 'blue' : 'red')
+      : winnerColor
+
+    setWinnerColor(newWinnerColor)
+    setWinnerCameFromBottom(challengerWon)   // drives entrance animation next round
+
     if (currentIndex >= gameItems.length) {
-      // No more challengers — this item is the champion
       setCurrentWinner(item)
       navigate('result')
     } else {
-      // Advance: winner stays, next item becomes the new challenger
       setCurrentWinner(item)
       setNextChallenger(gameItems[currentIndex])
       setCurrentIndex(prev => prev + 1)
@@ -113,6 +124,8 @@ export default function Home() {
     setNextChallenger('')
     setCurrentIndex(2)
     setWinHistory([])
+    setWinnerColor('red')
+    setWinnerCameFromBottom(false)
     navigate('round-select', -1)
   }
 
@@ -123,7 +136,7 @@ export default function Home() {
     setAddCatOpen(false)
   }
 
-  // ── Derived values ─────────────────────────────────────────────────
+  // ── Derived ────────────────────────────────────────────────────────
 
   const allCategories = [...DEFAULT_CATEGORIES, ...customCats]
   const isGameScreen  = GAME_SCREENS.includes(screen)
@@ -146,7 +159,6 @@ export default function Home() {
   return (
     <div className="flex flex-col h-full font-sarabun overflow-hidden">
 
-      {/* ── Overlays ───────────────────────────────────────────────── */}
       <AnimatePresence>
         {sidebarOpen && (
           <Sidebar key="sidebar"
@@ -165,24 +177,18 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      {/* ── Top bar (hidden during gameplay) ──────────────────────── */}
       <AnimatePresence>
         {!isGameScreen && (
           <motion.div key="topbar"
             initial={{ y: -56 }} animate={{ y: 0 }} exit={{ y: -56 }}
             transition={{ type: 'tween', duration: 0.22 }}
           >
-            <TopBar
-              title={topBarTitle}
-              coins={coins}
-              onMenuClick={() => setSidebarOpen(true)}
-              onBack={topBarBack}
-            />
+            <TopBar title={topBarTitle} coins={coins}
+              onMenuClick={() => setSidebarOpen(true)} onBack={topBarBack} />
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* ── Screen area ────────────────────────────────────────────── */}
       <div className="flex-1 relative overflow-hidden">
         <AnimatePresence mode="wait" custom={dir}>
 
@@ -212,11 +218,7 @@ export default function Home() {
               transition={{ type: 'tween', duration: 0.28 }}
               className="absolute inset-0"
             >
-              <RoundSelectScreen
-                category={selectedCat}
-                mode={selectedMode}
-                onSelect={handleRoundSelect}
-              />
+              <RoundSelectScreen category={selectedCat} mode={selectedMode} onSelect={handleRoundSelect} />
             </motion.div>
           )}
 
@@ -232,6 +234,8 @@ export default function Home() {
                 challenger={nextChallenger}
                 currentIndex={currentIndex}
                 totalItems={totalItems}
+                winnerColor={winnerColor}
+                winnerCameFromBottom={winnerCameFromBottom}
                 onChoose={handleChoose}
                 onBack={() => navigate('round-select', -1)}
               />
@@ -250,6 +254,8 @@ export default function Home() {
                 challenger={nextChallenger}
                 currentIndex={currentIndex}
                 totalItems={totalItems}
+                winnerColor={winnerColor}
+                winnerCameFromBottom={winnerCameFromBottom}
                 onChoose={handleChoose}
                 onBack={() => navigate('round-select', -1)}
               />
