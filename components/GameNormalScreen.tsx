@@ -9,8 +9,9 @@ interface Props {
   challenger: string
   currentIndex: number
   totalItems: number
-  winnerColor: 'red' | 'blue'           // color follows the item, not the position
-  winnerCameFromBottom: boolean          // true when challenger won last round
+  winnerColor: 'red' | 'blue'
+  winnerCameFromBottom: boolean
+  itemImages?: Record<string, string>
   onChoose: (item: string) => void
   onBack: () => void
 }
@@ -22,6 +23,7 @@ export default function GameNormalScreen({
   totalItems,
   winnerColor,
   winnerCameFromBottom,
+  itemImages,
   onChoose,
   onBack,
 }: Props) {
@@ -81,7 +83,7 @@ export default function GameNormalScreen({
       >
         {/* Background photo */}
         <img
-          src={getItemImage(winner)}
+          src={getItemImage(winner, itemImages)}
           alt={winner}
           className="absolute inset-0 w-full h-full object-cover"
           loading="eager"
@@ -180,7 +182,7 @@ export default function GameNormalScreen({
       >
         {/* Background photo */}
         <img
-          src={getItemImage(challenger)}
+          src={getItemImage(challenger, itemImages)}
           alt={challenger}
           className="absolute inset-0 w-full h-full object-cover"
           loading="eager"

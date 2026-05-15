@@ -11,6 +11,7 @@ import RoundSelectScreen from '@/components/RoundSelectScreen'
 import GameNormalScreen from '@/components/GameNormalScreen'
 import GameCameraScreen from '@/components/GameCameraScreen'
 import ResultScreen from '@/components/ResultScreen'
+import ManageCategoriesScreen from '@/components/ManageCategoriesScreen'
 import AddCategoryModal from '@/components/AddCategoryModal'
 
 const slide = {
@@ -19,7 +20,6 @@ const slide = {
   exit:  (dir: number) => ({ x: dir < 0 ? '100%' : '-100%', opacity: 0 }),
 }
 
-// Game screens use fast fade so the per-half enter animations inside the component shine
 const fade = {
   enter: () => ({ opacity: 0 }),
   center: { opacity: 1 },
@@ -33,6 +33,7 @@ export default function Home() {
   const [dir, setDir]                 = useState(1)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [addCatOpen, setAddCatOpen]   = useState(false)
+  const [editCat, setEditCat]         = useState<Category | null>(null)
   const [selectedCat, setSelectedCat] = useState<Category | null>(null)
   const [selectedMode, setSelectedMode] = useState<'normal' | 'camera'>('normal')
   const [coins, setCoins]             = useState(0)
@@ -45,9 +46,9 @@ export default function Home() {
   const [currentIndex, setCurrentIndex]       = useState(2)
   const [totalItems, setTotalItems]           = useState(5)
   const [winHistory, setWinHistory]           = useState<string[]>([])
-  // Color tracks the ITEM, not the position — winner keeps its color when it moves up
-  const [winnerColor, setWinnerColor]                 = useState<'red' | 'blue'>('red')
+  const [winnerColor, setWinnerColor]         = useState<'red' | 'blue'>('red')
   const [winnerCameFromBottom, setWinnerCameFromBottom] = useState(false)
+  const [itemImages, setItemImages]           = useState<Record<string, string>>({})
   // ──────────────────────────────────────────────────────────────────
 
   useEffect(() => {
@@ -78,14 +79,25 @@ export default function Home() {
 
   const handleRoundSelect = (itemCount: number) => {
     if (!selectedCat) return
-    const items = selectedCat.pairs.flat().slice(0, itemCount)
-    setGameItems(items)
-    setCurrentWinner(items[0])
-    setNextChallenger(items[1])
+    let itemNames: string[]
+    const images: Record<string, string> = {}
+
+    if (selectedCat.items) {
+      const sliced = selectedCat.items.slice(0, itemCount)
+      itemNames = sliced.map(i => i.name)
+      sliced.forEach(i => { if (i.imageDataUrl) images[i.name] = i.imageDataUrl })
+    } else {
+      itemNames = selectedCat.pairs.flat().slice(0, itemCount)
+    }
+
+    setItemImages(images)
+    setGameItems(itemNames)
+    setCurrentWinner(itemNames[0])
+    setNextChallenger(itemNames[1])
     setCurrentIndex(2)
     setTotalItems(itemCount)
     setWinHistory([])
-    setWinnerColor('red')           // item[0] always starts red
+    setWinnerColor('red')
     setWinnerCameFromBottom(false)
     navigate(selectedMode === 'camera' ? 'game-camera' : 'game-normal')
   }
@@ -99,14 +111,12 @@ export default function Home() {
     try { localStorage.setItem('pick_coins', String(newCoins)) } catch {}
 
     const challengerWon = item === nextChallenger
-
-    // Color follows the winner: if challenger (opposite color) wins, flip
     const newWinnerColor: 'red' | 'blue' = challengerWon
       ? (winnerColor === 'red' ? 'blue' : 'red')
       : winnerColor
 
     setWinnerColor(newWinnerColor)
-    setWinnerCameFromBottom(challengerWon)   // drives entrance animation next round
+    setWinnerCameFromBottom(challengerWon)
 
     if (currentIndex >= gameItems.length) {
       setCurrentWinner(item)
@@ -130,10 +140,27 @@ export default function Home() {
   }
 
   const handleAddCategory = (cat: Category) => {
-    const updated = [...customCats, cat]
+    let updated: Category[]
+    if (editCat) {
+      updated = customCats.map(c => c.id === cat.id ? cat : c)
+      setEditCat(null)
+    } else {
+      updated = [...customCats, cat]
+    }
     setCustomCats(updated)
     try { localStorage.setItem('pick_custom_cats', JSON.stringify(updated)) } catch {}
     setAddCatOpen(false)
+  }
+
+  const handleEditCategory = (cat: Category) => {
+    setEditCat(cat)
+    setAddCatOpen(true)
+  }
+
+  const handleDeleteCategory = (id: string) => {
+    const updated = customCats.filter(c => c.id !== id)
+    setCustomCats(updated)
+    try { localStorage.setItem('pick_custom_cats', JSON.stringify(updated)) } catch {}
   }
 
   // ── Derived ────────────────────────────────────────────────────────
@@ -141,17 +168,23 @@ export default function Home() {
   const allCategories = [...DEFAULT_CATEGORIES, ...customCats]
   const isGameScreen  = GAME_SCREENS.includes(screen)
 
+  const categoryMaxItems = selectedCat
+    ? (selectedCat.items?.length ?? selectedCat.pairs.flat().length)
+    : 10
+
   const topBarTitle =
-    screen === 'home'         ? 'หมวดหมู่' :
-    screen === 'mode-select'  ? (selectedCat?.name ?? '') :
-    screen === 'round-select' ? 'จำนวนไอเทม' :
-    screen === 'result'       ? 'ผลการเล่น' : ''
+    screen === 'home'              ? 'หมวดหมู่' :
+    screen === 'mode-select'       ? (selectedCat?.name ?? '') :
+    screen === 'round-select'      ? 'จำนวนไอเทม' :
+    screen === 'manage-categories' ? 'จัดการหมวดหมู่' :
+    screen === 'result'            ? 'ผลการเล่น' : ''
 
   const topBarBack =
-    screen === 'home'         ? undefined :
-    screen === 'mode-select'  ? () => navigate('home', -1) :
-    screen === 'round-select' ? () => navigate('mode-select', -1) :
-    screen === 'result'       ? () => navigate('home', -1) :
+    screen === 'home'              ? undefined :
+    screen === 'mode-select'       ? () => navigate('home', -1) :
+    screen === 'round-select'      ? () => navigate('mode-select', -1) :
+    screen === 'manage-categories' ? () => navigate('home', -1) :
+    screen === 'result'            ? () => navigate('home', -1) :
     undefined
 
   // ── Render ─────────────────────────────────────────────────────────
@@ -163,7 +196,7 @@ export default function Home() {
         {sidebarOpen && (
           <Sidebar key="sidebar"
             onClose={() => setSidebarOpen(false)}
-            onAddCategory={() => { setSidebarOpen(false); setAddCatOpen(true) }}
+            onManageCategories={() => { setSidebarOpen(false); navigate('manage-categories') }}
           />
         )}
       </AnimatePresence>
@@ -171,7 +204,8 @@ export default function Home() {
       <AnimatePresence>
         {addCatOpen && (
           <AddCategoryModal key="addcat"
-            onClose={() => setAddCatOpen(false)}
+            editCategory={editCat ?? undefined}
+            onClose={() => { setAddCatOpen(false); setEditCat(null) }}
             onAdd={handleAddCategory}
           />
         )}
@@ -218,7 +252,27 @@ export default function Home() {
               transition={{ type: 'tween', duration: 0.28 }}
               className="absolute inset-0"
             >
-              <RoundSelectScreen category={selectedCat} mode={selectedMode} onSelect={handleRoundSelect} />
+              <RoundSelectScreen
+                category={selectedCat}
+                mode={selectedMode}
+                maxItems={categoryMaxItems}
+                onSelect={handleRoundSelect}
+              />
+            </motion.div>
+          )}
+
+          {screen === 'manage-categories' && (
+            <motion.div key="manage-categories"
+              custom={dir} variants={slide} initial="enter" animate="center" exit="exit"
+              transition={{ type: 'tween', duration: 0.28 }}
+              className="absolute inset-0"
+            >
+              <ManageCategoriesScreen
+                customCats={customCats}
+                onEdit={handleEditCategory}
+                onDelete={handleDeleteCategory}
+                onAdd={() => { setEditCat(null); setAddCatOpen(true) }}
+              />
             </motion.div>
           )}
 
@@ -236,6 +290,7 @@ export default function Home() {
                 totalItems={totalItems}
                 winnerColor={winnerColor}
                 winnerCameFromBottom={winnerCameFromBottom}
+                itemImages={itemImages}
                 onChoose={handleChoose}
                 onBack={() => navigate('round-select', -1)}
               />
@@ -256,6 +311,7 @@ export default function Home() {
                 totalItems={totalItems}
                 winnerColor={winnerColor}
                 winnerCameFromBottom={winnerCameFromBottom}
+                itemImages={itemImages}
                 onChoose={handleChoose}
                 onBack={() => navigate('round-select', -1)}
               />

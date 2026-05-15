@@ -9,6 +9,8 @@ interface Props {
 }
 
 export default function ModeSelectScreen({ category, onSelect }: Props) {
+  const itemCount = category.items?.length ?? category.pairs.flat().length
+
   return (
     <div className="flex flex-col items-center justify-center h-full p-6 gap-6">
       <motion.div
@@ -17,9 +19,14 @@ export default function ModeSelectScreen({ category, onSelect }: Props) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
       >
-        <div className="text-7xl mb-3">{category.emoji}</div>
+        <div className="flex items-center justify-center w-20 h-20 mx-auto mb-3 rounded-3xl bg-gray-100 overflow-hidden">
+          {category.iconDataUrl
+            ? <img src={category.iconDataUrl} className="w-full h-full object-cover" />
+            : <span className="text-5xl">{category.emoji}</span>
+          }
+        </div>
         <h2 className="text-2xl font-extrabold text-gray-800">{category.name}</h2>
-        <p className="text-gray-500 mt-1 text-sm">{category.pairs.length} คู่คำถาม · เลือกโหมดการเล่น</p>
+        <p className="text-gray-500 mt-1 text-sm">{itemCount} ไอเทม · เลือกโหมดการเล่น</p>
       </motion.div>
 
       <div className="w-full space-y-4">

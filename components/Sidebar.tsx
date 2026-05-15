@@ -1,23 +1,23 @@
 'use client'
 import { motion } from 'framer-motion'
-import { PlusCircle, Globe, HelpCircle, LogIn, X } from 'lucide-react'
+import { FolderOpen, Globe, HelpCircle, LogIn, X } from 'lucide-react'
 
 interface Props {
   onClose: () => void
-  onAddCategory: () => void
+  onManageCategories: () => void
 }
 
 const MENU_ITEMS = [
-  { icon: PlusCircle, label: 'เพิ่มหมวดหมู่ใหม่', action: 'add', color: 'text-blue-500' },
-  { icon: Globe, label: 'ภาษา', action: 'lang', color: 'text-green-500' },
-  { icon: HelpCircle, label: 'วิธีเล่น', action: 'howto', color: 'text-orange-500' },
-  { icon: LogIn, label: 'เข้าสู่ระบบ', action: 'login', color: 'text-purple-500' },
+  { icon: FolderOpen, label: 'จัดการหมวดหมู่', action: 'manage', color: 'text-blue-500' },
+  { icon: Globe,      label: 'ภาษา',           action: 'lang',   color: 'text-green-500' },
+  { icon: HelpCircle, label: 'วิธีเล่น',        action: 'howto',  color: 'text-orange-500' },
+  { icon: LogIn,      label: 'เข้าสู่ระบบ',    action: 'login',  color: 'text-purple-500' },
 ]
 
-export default function Sidebar({ onClose, onAddCategory }: Props) {
+export default function Sidebar({ onClose, onManageCategories }: Props) {
   const handleItem = (action: string) => {
-    if (action === 'add') {
-      onAddCategory()
+    if (action === 'manage') {
+      onManageCategories()
     }
   }
 

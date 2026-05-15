@@ -73,7 +73,10 @@ export default function ResultScreen({ winner, category, totalItems, winHistory,
           className="w-full max-w-[240px] aspect-[3/4] rounded-3xl bg-gradient-to-br from-yellow-400 via-orange-400 to-red-400 shadow-2xl flex flex-col items-center justify-center p-7 shrink-0"
         >
           <div className="text-5xl mb-1">🏆</div>
-          <div className="text-5xl mb-4">{category.emoji}</div>
+          {category.iconDataUrl
+            ? <img src={category.iconDataUrl} className="w-14 h-14 rounded-2xl object-cover mb-4 mx-auto" />
+            : <div className="text-5xl mb-4">{category.emoji}</div>
+          }
           <p className="text-white text-2xl font-extrabold text-center leading-tight drop-shadow-lg">
             {winner}
           </p>

@@ -146,7 +146,8 @@ const ITEM_SEEDS: Record<string, string> = {
   'กินข้าวนอกบ้าน': 'restaurant',
 }
 
-export const getItemImage = (item: string): string => {
+export const getItemImage = (item: string, overrides?: Record<string, string>): string => {
+  if (overrides?.[item]) return overrides[item]
   const seed = ITEM_SEEDS[item] ?? encodeURIComponent(item)
   return `https://picsum.photos/seed/${seed}/400/600`
 }

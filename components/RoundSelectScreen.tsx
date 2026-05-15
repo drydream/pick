@@ -7,6 +7,7 @@ import { Category } from '@/lib/types'
 interface Props {
   category: Category
   mode: 'normal' | 'camera'
+  maxItems: number
   onSelect: (itemCount: number) => void
 }
 
@@ -15,7 +16,7 @@ const OPTIONS = [
   { value: 10, rounds: 9, desc: 'เล่น 9 รอบ · ท้าทายกว่า' },
 ]
 
-export default function RoundSelectScreen({ category, mode, onSelect }: Props) {
+export default function RoundSelectScreen({ category, mode, maxItems, onSelect }: Props) {
   const [selected, setSelected] = useState(5)
 
   const ModeIcon = mode === 'camera' ? Camera : Gamepad2
@@ -31,7 +32,12 @@ export default function RoundSelectScreen({ category, mode, onSelect }: Props) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
       >
-        <div className="text-6xl mb-3">{category.emoji}</div>
+        <div className="flex items-center justify-center w-16 h-16 mx-auto mb-3 rounded-2xl bg-gray-100 overflow-hidden">
+          {category.iconDataUrl
+            ? <img src={category.iconDataUrl} className="w-full h-full object-cover" />
+            : <span className="text-5xl">{category.emoji}</span>
+          }
+        </div>
         <h2 className="text-2xl font-extrabold text-gray-800">เลือกจำนวนไอเทม</h2>
         <p className="text-gray-500 text-sm mt-1">ผู้รอดจะกลายเป็นแชมเปี้ยน</p>
         <div className="flex items-center justify-center gap-1.5 mt-2">
@@ -47,49 +53,52 @@ export default function RoundSelectScreen({ category, mode, onSelect }: Props) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
       >
-        {OPTIONS.map((opt, i) => (
-          <motion.button
-            key={opt.value}
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.12 + i * 0.08, type: 'spring', stiffness: 200 }}
-            whileTap={{ scale: 0.94 }}
-            onClick={() => setSelected(opt.value)}
-            className={`flex-1 py-7 rounded-3xl flex flex-col items-center gap-1.5 border-2 transition-all duration-200 ${
-              selected === opt.value
-                ? 'bg-indigo-500 border-indigo-500 shadow-lg shadow-indigo-200'
-                : 'bg-gray-50 border-gray-200'
-            }`}
-          >
-            <span className={`text-5xl font-extrabold leading-none tabular-nums ${
-              selected === opt.value ? 'text-white' : 'text-gray-800'
-            }`}>
-              {opt.value}
-            </span>
-            <span className={`text-sm font-bold ${
-              selected === opt.value ? 'text-indigo-100' : 'text-gray-500'
-            }`}>
-              รายการ
-            </span>
-            <span className={`text-xs text-center leading-snug px-2 mt-0.5 ${
-              selected === opt.value ? 'text-indigo-200' : 'text-gray-400'
-            }`}>
-              {opt.desc}
-            </span>
-            {selected === opt.value && (
-              <motion.div
-                layoutId="item-check"
-                className="w-6 h-6 rounded-full bg-white/30 flex items-center justify-center mt-1"
-                initial={false}
-              >
-                <span className="text-white text-xs font-black">✓</span>
-              </motion.div>
-            )}
-          </motion.button>
-        ))}
+        {OPTIONS.map((opt, i) => {
+          const disabled = opt.value > maxItems
+          const active = selected === opt.value && !disabled
+          return (
+            <motion.button
+              key={opt.value}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: disabled ? 0.4 : 1, scale: 1 }}
+              transition={{ delay: 0.12 + i * 0.08, type: 'spring', stiffness: 200 }}
+              whileTap={disabled ? {} : { scale: 0.94 }}
+              disabled={disabled}
+              onClick={() => { if (!disabled) setSelected(opt.value) }}
+              className={`flex-1 py-7 rounded-3xl flex flex-col items-center gap-1.5 border-2 transition-all duration-200 ${
+                disabled
+                  ? 'bg-gray-50 border-gray-200 cursor-not-allowed'
+                  : active
+                  ? 'bg-indigo-500 border-indigo-500 shadow-lg shadow-indigo-200'
+                  : 'bg-gray-50 border-gray-200'
+              }`}
+            >
+              <span className={`text-5xl font-extrabold leading-none tabular-nums ${
+                active ? 'text-white' : 'text-gray-800'
+              }`}>{opt.value}</span>
+              <span className={`text-sm font-bold ${active ? 'text-indigo-100' : 'text-gray-500'}`}>
+                รายการ
+              </span>
+              <span className={`text-xs text-center leading-snug px-2 mt-0.5 ${
+                active ? 'text-indigo-200' : 'text-gray-400'
+              }`}>
+                {disabled ? `ต้องการ ${opt.value} ไอเทม` : opt.desc}
+              </span>
+              {active && (
+                <motion.div
+                  layoutId="item-check"
+                  className="w-6 h-6 rounded-full bg-white/30 flex items-center justify-center mt-1"
+                  initial={false}
+                >
+                  <span className="text-white text-xs font-black">✓</span>
+                </motion.div>
+              )}
+            </motion.button>
+          )
+        })}
       </motion.div>
 
-      {/* How it works hint */}
+      {/* How it works */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}

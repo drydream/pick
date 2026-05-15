@@ -11,6 +11,7 @@ interface Props {
   totalItems: number
   winnerColor: 'red' | 'blue'
   winnerCameFromBottom: boolean
+  itemImages?: Record<string, string>
   onChoose: (item: string) => void
   onBack: () => void
 }
@@ -22,6 +23,7 @@ export default function GameCameraScreen({
   totalItems,
   winnerColor,
   winnerCameFromBottom,
+  itemImages,
   onChoose,
   onBack,
 }: Props) {
@@ -126,7 +128,7 @@ export default function GameCameraScreen({
         >
           {/* Thumbnail image strip */}
           <div className="relative h-20 w-full overflow-hidden">
-            <img src={getItemImage(winner)} alt={winner}
+            <img src={getItemImage(winner, itemImages)} alt={winner}
               className="w-full h-full object-cover" loading="eager" />
             <div className={`absolute inset-0 ${winnerCardBg} opacity-40`} />
             {/* Crown + color tag inside image */}
@@ -179,7 +181,7 @@ export default function GameCameraScreen({
           </div>
           {/* Thumbnail image strip */}
           <div className="relative h-20 w-full overflow-hidden">
-            <img src={getItemImage(challenger)} alt={challenger}
+            <img src={getItemImage(challenger, itemImages)} alt={challenger}
               className="w-full h-full object-cover" loading="eager" />
             <div className={`absolute inset-0 ${challengerCardBg} opacity-40`} />
             <div className="absolute top-2 right-3 flex items-center gap-1">
