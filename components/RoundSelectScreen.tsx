@@ -7,12 +7,12 @@ import { Category } from '@/lib/types'
 interface Props {
   category: Category
   mode: 'normal' | 'camera'
-  onSelect: (rounds: number) => void
+  onSelect: (itemCount: number) => void
 }
 
 const OPTIONS = [
-  { value: 5, desc: 'เล่นสั้น ๆ รวดเร็ว' },
-  { value: 10, desc: 'ท้าทายมากขึ้น' },
+  { value: 5,  rounds: 4, desc: 'เล่น 4 รอบ · เร็วทันใจ' },
+  { value: 10, rounds: 9, desc: 'เล่น 9 รอบ · ท้าทายกว่า' },
 ]
 
 export default function RoundSelectScreen({ category, mode, onSelect }: Props) {
@@ -20,6 +20,7 @@ export default function RoundSelectScreen({ category, mode, onSelect }: Props) {
 
   const ModeIcon = mode === 'camera' ? Camera : Gamepad2
   const modeName = mode === 'camera' ? 'โหมดกล้อง' : 'โหมดปกติ'
+  const selectedRounds = OPTIONS.find(o => o.value === selected)!.rounds
 
   return (
     <div className="flex flex-col items-center justify-center h-full p-6 gap-7">
@@ -31,14 +32,15 @@ export default function RoundSelectScreen({ category, mode, onSelect }: Props) {
         transition={{ duration: 0.3 }}
       >
         <div className="text-6xl mb-3">{category.emoji}</div>
-        <h2 className="text-2xl font-extrabold text-gray-800">เลือกจำนวนรอบ</h2>
+        <h2 className="text-2xl font-extrabold text-gray-800">เลือกจำนวนไอเทม</h2>
+        <p className="text-gray-500 text-sm mt-1">ผู้รอดจะกลายเป็นแชมเปี้ยน</p>
         <div className="flex items-center justify-center gap-1.5 mt-2">
           <ModeIcon size={14} className="text-gray-400" />
           <span className="text-gray-400 text-sm">{category.name} · {modeName}</span>
         </div>
       </motion.div>
 
-      {/* Round toggle */}
+      {/* Item count toggle */}
       <motion.div
         className="w-full flex gap-3"
         initial={{ opacity: 0, y: 16 }}
@@ -53,36 +55,30 @@ export default function RoundSelectScreen({ category, mode, onSelect }: Props) {
             transition={{ delay: 0.12 + i * 0.08, type: 'spring', stiffness: 200 }}
             whileTap={{ scale: 0.94 }}
             onClick={() => setSelected(opt.value)}
-            className={`flex-1 py-8 rounded-3xl flex flex-col items-center gap-2 border-2 transition-all duration-200 ${
+            className={`flex-1 py-7 rounded-3xl flex flex-col items-center gap-1.5 border-2 transition-all duration-200 ${
               selected === opt.value
                 ? 'bg-indigo-500 border-indigo-500 shadow-lg shadow-indigo-200'
                 : 'bg-gray-50 border-gray-200'
             }`}
           >
-            <span
-              className={`text-5xl font-extrabold leading-none tabular-nums ${
-                selected === opt.value ? 'text-white' : 'text-gray-800'
-              }`}
-            >
+            <span className={`text-5xl font-extrabold leading-none tabular-nums ${
+              selected === opt.value ? 'text-white' : 'text-gray-800'
+            }`}>
               {opt.value}
             </span>
-            <span
-              className={`text-base font-bold ${
-                selected === opt.value ? 'text-indigo-100' : 'text-gray-600'
-              }`}
-            >
-              รอบ
+            <span className={`text-sm font-bold ${
+              selected === opt.value ? 'text-indigo-100' : 'text-gray-500'
+            }`}>
+              รายการ
             </span>
-            <span
-              className={`text-xs px-3 text-center leading-snug ${
-                selected === opt.value ? 'text-indigo-200' : 'text-gray-400'
-              }`}
-            >
+            <span className={`text-xs text-center leading-snug px-2 mt-0.5 ${
+              selected === opt.value ? 'text-indigo-200' : 'text-gray-400'
+            }`}>
               {opt.desc}
             </span>
             {selected === opt.value && (
               <motion.div
-                layoutId="round-check"
+                layoutId="item-check"
                 className="w-6 h-6 rounded-full bg-white/30 flex items-center justify-center mt-1"
                 initial={false}
               >
@@ -93,16 +89,29 @@ export default function RoundSelectScreen({ category, mode, onSelect }: Props) {
         ))}
       </motion.div>
 
+      {/* How it works hint */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.3 }}
+        className="flex items-center gap-2 bg-gray-50 rounded-2xl px-4 py-3 w-full"
+      >
+        <span className="text-lg shrink-0">⚔️</span>
+        <p className="text-xs text-gray-500 leading-relaxed">
+          ไอเทม 1 ต่อสู้กับไอเทม 2 → ผู้ชนะสู้กับไอเทม 3 → ... → แชมเปี้ยน!
+        </p>
+      </motion.div>
+
       {/* Start button */}
       <motion.button
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
+        transition={{ delay: 0.35 }}
         whileTap={{ scale: 0.96 }}
         className="w-full py-5 rounded-3xl bg-gray-900 text-white font-extrabold text-lg shadow-lg active:shadow-sm transition-shadow"
         onClick={() => onSelect(selected)}
       >
-        เริ่มเล่นเลย {selected} รอบ 🎯
+        เริ่มเล่น {selectedRounds} รอบ 🏆
       </motion.button>
     </div>
   )
