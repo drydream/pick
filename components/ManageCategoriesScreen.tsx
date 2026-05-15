@@ -19,8 +19,8 @@ export default function ManageCategoriesScreen({ customCats, onEdit, onDelete, o
       <div className="px-4 pt-4 pb-2 shrink-0">
         <p className="text-gray-500 text-sm">
           {customCats.length > 0
-            ? `${customCats.length} หมวดหมู่ที่สร้างเอง`
-            : 'ยังไม่มีหมวดหมู่ที่สร้างเอง'}
+            ? `${customCats.length} Custom Categories`
+            : 'No custom categories yet'}
         </p>
       </div>
 
@@ -49,7 +49,7 @@ export default function ManageCategoriesScreen({ customCats, onEdit, onDelete, o
                   {/* Info */}
                   <div className="flex-1 min-w-0">
                     <p className="text-gray-900 font-bold truncate">{cat.name}</p>
-                    <p className="text-gray-400 text-xs">{itemCount} ไอเทม</p>
+                    <p className="text-gray-400 text-xs">{itemCount} Items</p>
                   </div>
 
                   {/* Actions */}
@@ -59,13 +59,13 @@ export default function ManageCategoriesScreen({ customCats, onEdit, onDelete, o
                         onClick={() => { onDelete(cat.id); setDeletingId(null) }}
                         className="px-3 py-1.5 rounded-xl bg-red-500 text-white text-xs font-bold"
                       >
-                        ยืนยันลบ
+                        Confirm Delete
                       </button>
                       <button
                         onClick={() => setDeletingId(null)}
                         className="px-3 py-1.5 rounded-xl bg-gray-100 text-gray-600 text-xs font-bold"
                       >
-                        ยกเลิก
+                        Cancel
                       </button>
                     </div>
                   ) : (
@@ -74,13 +74,13 @@ export default function ManageCategoriesScreen({ customCats, onEdit, onDelete, o
                         onClick={() => onEdit(cat)}
                         className="px-3 py-1.5 rounded-xl bg-indigo-50 text-indigo-600 text-xs font-bold flex items-center gap-1"
                       >
-                        <Edit2 size={11} />แก้ไข
+                        <Edit2 size={11} />Edit
                       </button>
                       <button
                         onClick={() => setDeletingId(cat.id)}
                         className="px-3 py-1.5 rounded-xl bg-red-50 text-red-500 text-xs font-bold flex items-center gap-1"
                       >
-                        <Trash2 size={11} />ลบ
+                        <Trash2 size={11} />Delete
                       </button>
                     </div>
                   )}
@@ -94,8 +94,8 @@ export default function ManageCategoriesScreen({ customCats, onEdit, onDelete, o
           <div className="flex flex-col items-center justify-center py-20 gap-3">
             <span className="text-5xl">📦</span>
             <p className="text-gray-400 text-sm text-center leading-relaxed">
-              ยังไม่มีหมวดหมู่ที่สร้างเอง<br />
-              กดปุ่มด้านล่างเพื่อเริ่มสร้างหมวดหมู่แรก
+              No custom categories yet<br />
+              สร้างอันแรกของคุณ ได้เลย! 🎯
             </p>
           </div>
         )}
@@ -107,7 +107,7 @@ export default function ManageCategoriesScreen({ customCats, onEdit, onDelete, o
           onClick={onAdd}
           className="w-full py-4 rounded-2xl bg-indigo-500 text-white font-extrabold text-base flex items-center justify-center gap-2 shadow-lg shadow-indigo-200 active:scale-95 transition-transform"
         >
-          <Plus size={18} />เพิ่มหมวดหมู่ใหม่
+          <Plus size={18} />New Category
         </button>
       </div>
     </div>

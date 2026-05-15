@@ -15,7 +15,7 @@ export default function TopBar({ title, coins, onMenuClick, onBack }: Props) {
       <button
         className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors"
         onClick={onBack ?? onMenuClick}
-        aria-label={onBack ? 'กลับ' : 'เมนู'}
+        aria-label={onBack ? 'Back' : 'Menu'}
       >
         {onBack ? <ArrowLeft size={22} /> : <Menu size={22} />}
       </button>

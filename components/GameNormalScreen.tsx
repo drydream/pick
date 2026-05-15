@@ -96,7 +96,7 @@ export default function GameNormalScreen({
         <div className="absolute top-4 left-4 z-10 flex items-center gap-1.5">
           <span className="text-xl leading-none drop-shadow">👑</span>
           <span className="text-white/80 text-xs font-semibold tracking-wide drop-shadow">
-            ผู้ท้าชนะเดิม
+            Defending Champ
           </span>
         </div>
 
@@ -150,7 +150,7 @@ export default function GameNormalScreen({
       <div className="h-14 bg-gray-900 flex items-center justify-between px-4 z-10 shrink-0">
         <button
           className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-700 hover:bg-gray-600 transition-colors"
-          onClick={onBack} aria-label="กลับ"
+          onClick={onBack} aria-label="Back"
         >
           <ArrowLeft size={16} className="text-white" />
         </button>
@@ -164,7 +164,7 @@ export default function GameNormalScreen({
         </div>
 
         <span className="text-yellow-400 text-xs font-semibold tabular-nums">
-          รอบที่ {roundNumber}/{totalRounds}
+          Round {roundNumber}/{totalRounds}
         </span>
       </div>
 
@@ -194,7 +194,7 @@ export default function GameNormalScreen({
         {/* Challenger badge */}
         <div className="absolute top-4 right-4 z-10 flex items-center gap-1.5">
           <span className="text-white/80 text-xs font-semibold tracking-wide drop-shadow">
-            ผู้ท้าชิง
+            Challenger
           </span>
           <span className="text-xl leading-none drop-shadow">⚔️</span>
         </div>

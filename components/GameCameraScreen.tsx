@@ -83,9 +83,9 @@ export default function GameCameraScreen({
       ) : (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-900 gap-3">
           <CameraOff size={52} className="text-gray-500" />
-          <p className="text-gray-400 text-base">ไม่สามารถเข้าถึงกล้องได้</p>
+          <p className="text-gray-400 text-base">Camera Access Denied</p>
           <p className="text-gray-600 text-sm px-8 text-center">
-            กรุณาอนุญาตการใช้กล้องในเบราว์เซอร์ของคุณ
+            กรุณา Allow camera access ในเบราว์เซอร์ก่อนนะ
           </p>
         </div>
       )}
@@ -105,11 +105,11 @@ export default function GameCameraScreen({
       {/* Back + round counter */}
       <div className="absolute top-3 left-0 right-0 flex items-center justify-between px-4 z-20">
         <button className="w-10 h-10 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center"
-          onClick={onBack} aria-label="กลับ">
+          onClick={onBack} aria-label="Back">
           <ArrowLeft size={20} className="text-white" />
         </button>
         <span className="text-white text-sm font-semibold bg-black/50 backdrop-blur-sm px-3 py-1 rounded-full tabular-nums">
-          รอบที่ {roundNumber}/{totalRounds}
+          Round {roundNumber}/{totalRounds}
         </span>
       </div>
 
@@ -134,7 +134,7 @@ export default function GameCameraScreen({
             {/* Crown + color tag inside image */}
             <div className="absolute top-2 left-3 flex items-center gap-1">
               <span className="text-base leading-none">👑</span>
-              <span className="text-white/80 text-xs font-semibold">ผู้ท้าชนะเดิม</span>
+              <span className="text-white/80 text-xs font-semibold">Defending Champ</span>
             </div>
             <div className="absolute top-2 right-3">
               <span className="text-sm">{winnerColor === 'red' ? '🔴' : '🔵'}</span>
@@ -145,7 +145,7 @@ export default function GameCameraScreen({
             <p className="text-xl font-extrabold text-white drop-shadow leading-tight">{winner}</p>
             {chosen === 'winner' && (
               <motion.p initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }}
-                className="text-white text-sm mt-0.5">✓ ผ่านไปได้!</motion.p>
+                className="text-white text-sm mt-0.5">✓ Winner!</motion.p>
             )}
           </div>
         </motion.div>
@@ -176,7 +176,7 @@ export default function GameCameraScreen({
             <p className="text-xl font-extrabold text-white drop-shadow leading-tight">{challenger}</p>
             {chosen === 'challenger' && (
               <motion.p initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }}
-                className="text-white text-sm mt-0.5">✓ ผ่านไปได้!</motion.p>
+                className="text-white text-sm mt-0.5">✓ Winner!</motion.p>
             )}
           </div>
           {/* Thumbnail image strip */}
@@ -185,7 +185,7 @@ export default function GameCameraScreen({
               className="w-full h-full object-cover" loading="eager" />
             <div className={`absolute inset-0 ${challengerCardBg} opacity-40`} />
             <div className="absolute top-2 right-3 flex items-center gap-1">
-              <span className="text-white/80 text-xs font-semibold">ผู้ท้าชิง</span>
+              <span className="text-white/80 text-xs font-semibold">Challenger</span>
               <span className="text-base leading-none">⚔️</span>
             </div>
             <div className="absolute top-2 left-3">

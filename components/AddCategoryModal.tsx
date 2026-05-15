@@ -93,8 +93,8 @@ export default function AddCategoryModal({ editCategory, onClose, onAdd }: Props
 
   const handleSave = () => {
     const errs: string[] = []
-    if (!catName.trim()) errs.push('กรุณาระบุชื่อหมวดหมู่')
-    if (filledItems.length < 6) errs.push(`ต้องมีไอเทมอย่างน้อย 6 รายการ (ปัจจุบัน ${filledItems.length})`)
+    if (!catName.trim()) errs.push('Category name is required')
+    if (filledItems.length < 6) errs.push(`ต้องมีอย่างน้อย 6 Items (ตอนนี้มี ${filledItems.length})`)
     if (errs.length) { setErrors(errs); return }
     setErrors([])
     onAdd({
@@ -126,7 +126,7 @@ export default function AddCategoryModal({ editCategory, onClose, onAdd }: Props
           <ChevronLeft size={20} className="text-gray-700" />
         </button>
         <h1 className="flex-1 text-lg font-extrabold text-gray-900">
-          {editCategory ? 'แก้ไขหมวดหมู่' : 'เพิ่มหมวดหมู่ใหม่'}
+          {editCategory ? 'Edit Category' : 'New Category'}
         </h1>
       </div>
 
@@ -135,7 +135,7 @@ export default function AddCategoryModal({ editCategory, onClose, onAdd }: Props
 
         {/* ── Icon picker ─────────────────────────────── */}
         <section>
-          <p className="text-sm font-bold text-gray-700 mb-2">ไอคอนหมวดหมู่</p>
+          <p className="text-sm font-bold text-gray-700 mb-2">Category Icon</p>
           <div className="flex flex-wrap gap-2">
             <button onClick={() => iconInputRef.current?.click()}
               className={`w-11 h-11 rounded-xl border-2 flex items-center justify-center shrink-0 overflow-hidden ${
@@ -164,12 +164,12 @@ export default function AddCategoryModal({ editCategory, onClose, onAdd }: Props
 
         {/* ── Category name ───────────────────────────── */}
         <section>
-          <p className="text-sm font-bold text-gray-700 mb-2">ชื่อหมวดหมู่</p>
+          <p className="text-sm font-bold text-gray-700 mb-2">Category Name</p>
           <input
             type="text"
             value={catName}
             onChange={e => setCatName(e.target.value)}
-            placeholder="เช่น นักแสดงที่ชอบ, เพลงโปรด..."
+            placeholder="e.g. ดาราที่ชอบ, เพลงโปรด..."
             className="w-full border border-gray-200 rounded-2xl px-4 py-3 text-base placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-400"
           />
         </section>
@@ -177,11 +177,11 @@ export default function AddCategoryModal({ editCategory, onClose, onAdd }: Props
         {/* ── Item list ───────────────────────────────── */}
         <section>
           <div className="flex items-center justify-between mb-3">
-            <p className="text-sm font-bold text-gray-700">รายการไอเทม</p>
+            <p className="text-sm font-bold text-gray-700">Items</p>
             <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${
               filledItems.length >= 6 ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-600'
             }`}>
-              {filledItems.length}/6 ขั้นต่ำ
+              {filledItems.length}/6 min
             </span>
           </div>
 
@@ -211,7 +211,7 @@ export default function AddCategoryModal({ editCategory, onClose, onAdd }: Props
                       type="text"
                       value={it.name}
                       onChange={e => updateItemName(it.id, e.target.value)}
-                      placeholder={`ไอเทมที่ ${idx + 1}`}
+                      placeholder={`Item ${idx + 1}`}
                       className="flex-1 border border-gray-200 rounded-xl px-3 py-2.5 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-400"
                     />
 
@@ -229,7 +229,7 @@ export default function AddCategoryModal({ editCategory, onClose, onAdd }: Props
 
           <button onClick={addItem}
             className="w-full py-2.5 mt-1 border-2 border-dashed border-indigo-200 rounded-xl text-indigo-500 text-sm font-semibold flex items-center justify-center gap-1.5">
-            <Plus size={15} />เพิ่มไอเทม
+            <Plus size={15} />Add Item
           </button>
         </section>
 
@@ -252,8 +252,8 @@ export default function AddCategoryModal({ editCategory, onClose, onAdd }: Props
         {/* ── Privacy notice ──────────────────────────── */}
         <div className="bg-blue-50 rounded-2xl px-4 py-3">
           <p className="text-blue-700 text-xs leading-relaxed">
-            🔒 ข้อมูลนี้จะถูกบันทึกไว้บนเครื่องและในบัญชีของคุณเท่านั้น
-            จะไม่ปรากฏเป็นสาธารณะบน Server
+            🔒 ข้อมูลจะถูก Save ไว้บนเครื่องและ Account ของคุณเท่านั้น
+            ไม่ได้ขึ้น Public Server
           </p>
         </div>
 
@@ -261,7 +261,7 @@ export default function AddCategoryModal({ editCategory, onClose, onAdd }: Props
         <div className="space-y-2 pb-3">
           <button onClick={() => setShowSubmitDetail(v => !v)}
             className="w-full py-3 rounded-2xl border-2 border-gray-200 text-gray-600 text-sm font-bold flex items-center justify-center gap-2">
-            <Send size={14} />ส่งคำขอขึ้นระบบสาธารณะ
+            <Send size={14} />Request to Go Public
           </button>
           <AnimatePresence>
             {showSubmitDetail && (
@@ -270,8 +270,8 @@ export default function AddCategoryModal({ editCategory, onClose, onAdd }: Props
                 exit={{ opacity: 0, height: 0 }}
                 className="text-xs text-gray-500 text-center leading-relaxed overflow-hidden"
               >
-                ข้อมูลของคุณจะเข้าสู่กระบวนการตรวจสอบโดยแอดมินก่อนนำขึ้นระบบจริง
-                เพื่อป้องกันเนื้อหาที่ผิดกฎหมายหรือละเมิดนโยบาย
+                ข้อมูลจะผ่านการ Review โดย Admin ก่อน
+                เพื่อ Block เนื้อหาที่ไม่เหมาะสมหรือผิดกฎหมาย
               </motion.p>
             )}
           </AnimatePresence>
@@ -282,7 +282,7 @@ export default function AddCategoryModal({ editCategory, onClose, onAdd }: Props
       <div className="px-4 pb-6 pt-3 border-t border-gray-100 shrink-0 bg-white">
         <button onClick={handleSave}
           className="w-full py-4 rounded-2xl bg-indigo-500 text-white font-extrabold text-base shadow-lg shadow-indigo-200 active:scale-95 transition-transform">
-          บันทึกหมวดหมู่
+          Save Category
         </button>
       </div>
     </motion.div>

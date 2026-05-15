@@ -21,9 +21,9 @@ export default function ResultScreen({ winner, category, totalItems, winHistory,
   const totalRounds = totalItems - 1
 
   const handleShare = async () => {
-    const text = `🏆 แชมเปี้ยนของฉันในเกม PICK คือ "${winner}" จากหมวด ${category.name}! ผ่านมาทั้งหมด ${totalRounds} รอบ แล้วคุณล่ะ? 🎯`
+    const text = `🏆 My PICK Champion คือ "${winner}" จาก ${category.name}! ผ่าน ${totalRounds} Rounds มาแล้ว แล้วคุณล่ะ? 🎯`
     if (navigator.share) {
-      try { await navigator.share({ title: 'PICK — แชมเปี้ยน!', text, url: window.location.href }) }
+      try { await navigator.share({ title: 'PICK — Champion!', text, url: window.location.href }) }
       catch { /* dismissed */ }
     } else {
       await navigator.clipboard.writeText(text)
@@ -59,9 +59,9 @@ export default function ResultScreen({ winner, category, totalItems, winHistory,
           className="text-center"
         >
           <p className="text-gray-400 text-xs font-semibold tracking-widest uppercase mb-0.5">
-            ผ่านมาครบ {totalRounds} รอบ
+            ผ่าน {totalRounds} Rounds มาแล้ว 🔥
           </p>
-          <p className="text-2xl font-extrabold text-gray-800">🏆 แชมเปี้ยน!</p>
+          <p className="text-2xl font-extrabold text-gray-800">🏆 Champion!</p>
         </motion.div>
 
         {/* Champion card — captured by html2canvas */}
@@ -81,7 +81,7 @@ export default function ResultScreen({ winner, category, totalItems, winHistory,
             {winner}
           </p>
           <div className="mt-4 px-3 py-1 bg-white/25 rounded-full">
-            <span className="text-white text-xs font-bold">ผ่าน {totalRounds} รอบ</span>
+            <span className="text-white text-xs font-bold">Survived {totalRounds} Rounds</span>
           </div>
           <div className="mt-2 px-3 py-0.5 bg-white/15 rounded-full">
             <span className="text-white/70 text-xs">{category.name}</span>
@@ -97,7 +97,7 @@ export default function ResultScreen({ winner, category, totalItems, winHistory,
             transition={{ delay: 0.4 }}
             className="w-full"
           >
-            <p className="text-xs text-gray-400 text-center mb-2 font-medium">ประวัติผู้ชนะแต่ละรอบ</p>
+            <p className="text-xs text-gray-400 text-center mb-2 font-medium">Round History</p>
             <div className="flex flex-wrap justify-center gap-1.5">
               {winHistory.map((item, i) => (
                 <motion.div
@@ -133,7 +133,7 @@ export default function ResultScreen({ winner, category, totalItems, winHistory,
             className="flex items-center justify-center gap-2 py-4 rounded-2xl bg-blue-500 text-white font-bold shadow-lg shadow-blue-200 active:scale-95 transition-transform"
           >
             <Share2 size={17} />
-            <span>{copied ? 'คัดลอกแล้ว!' : 'แชร์เลย'}</span>
+            <span>{copied ? 'Copied!' : 'Share'}</span>
           </button>
           <button
             onClick={handleSave}
@@ -141,7 +141,7 @@ export default function ResultScreen({ winner, category, totalItems, winHistory,
             className="flex items-center justify-center gap-2 py-4 rounded-2xl bg-emerald-500 text-white font-bold shadow-lg shadow-emerald-200 active:scale-95 transition-transform disabled:opacity-50"
           >
             <Download size={17} />
-            <span>{saving ? 'กำลังบันทึก...' : 'บันทึกลงเครื่อง'}</span>
+            <span>{saving ? 'Saving...' : 'Save Image'}</span>
           </button>
         </div>
         <div className="grid grid-cols-2 gap-3">
@@ -150,14 +150,14 @@ export default function ResultScreen({ winner, category, totalItems, winHistory,
             className="flex items-center justify-center gap-2 py-4 rounded-2xl bg-indigo-100 text-indigo-700 font-bold active:scale-95 transition-transform"
           >
             <RotateCcw size={17} />
-            <span>เล่นอีกครั้ง</span>
+            <span>Play Again</span>
           </button>
           <button
             onClick={onGoHome}
             className="flex items-center justify-center gap-2 py-4 rounded-2xl bg-gray-800 text-white font-bold active:scale-95 transition-transform"
           >
             <Home size={17} />
-            <span>หน้าหลัก</span>
+            <span>Home</span>
           </button>
         </div>
       </motion.div>

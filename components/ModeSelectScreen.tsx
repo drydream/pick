@@ -26,7 +26,7 @@ export default function ModeSelectScreen({ category, onSelect }: Props) {
           }
         </div>
         <h2 className="text-2xl font-extrabold text-gray-800">{category.name}</h2>
-        <p className="text-gray-500 mt-1 text-sm">{itemCount} ไอเทม · เลือกโหมดการเล่น</p>
+        <p className="text-gray-500 mt-1 text-sm">{itemCount} Items · Choose a Mode</p>
       </motion.div>
 
       <div className="w-full space-y-4">
@@ -39,8 +39,8 @@ export default function ModeSelectScreen({ category, onSelect }: Props) {
           onClick={() => onSelect('camera')}
         >
           <Camera size={34} strokeWidth={1.8} />
-          <span className="text-xl font-extrabold tracking-tight">เล่นแบบเปิดกล้อง</span>
-          <span className="text-sm opacity-75">ใช้กล้องหน้าแสดงตัวเอง</span>
+          <span className="text-xl font-extrabold tracking-tight">Camera Mode</span>
+          <span className="text-sm opacity-75">Show yourself live on screen</span>
         </motion.button>
 
         <motion.button
@@ -52,8 +52,8 @@ export default function ModeSelectScreen({ category, onSelect }: Props) {
           onClick={() => onSelect('normal')}
         >
           <Gamepad2 size={34} strokeWidth={1.8} />
-          <span className="text-xl font-extrabold tracking-tight">เล่นโหมดปกติ</span>
-          <span className="text-sm opacity-75">หน้าจอแบ่งสีแดง vs น้ำเงิน</span>
+          <span className="text-xl font-extrabold tracking-tight">Classic Mode</span>
+          <span className="text-sm opacity-75">Red vs Blue · full screen</span>
         </motion.button>
       </div>
     </div>

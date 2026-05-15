@@ -173,11 +173,11 @@ export default function Home() {
     : 10
 
   const topBarTitle =
-    screen === 'home'              ? 'หมวดหมู่' :
+    screen === 'home'              ? 'Categories' :
     screen === 'mode-select'       ? (selectedCat?.name ?? '') :
-    screen === 'round-select'      ? 'จำนวนไอเทม' :
-    screen === 'manage-categories' ? 'จัดการหมวดหมู่' :
-    screen === 'result'            ? 'ผลการเล่น' : ''
+    screen === 'round-select'      ? 'Select Items' :
+    screen === 'manage-categories' ? 'Manage Categories' :
+    screen === 'result'            ? 'Results' : ''
 
   const topBarBack =
     screen === 'home'              ? undefined :

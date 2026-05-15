@@ -12,15 +12,15 @@ interface Props {
 }
 
 const OPTIONS = [
-  { value: 5,  rounds: 4, desc: 'เล่น 4 รอบ · เร็วทันใจ' },
-  { value: 10, rounds: 9, desc: 'เล่น 9 รอบ · ท้าทายกว่า' },
+  { value: 5,  rounds: 4, desc: '4 Rounds · Quick Play' },
+  { value: 10, rounds: 9, desc: '9 Rounds · Full Battle' },
 ]
 
 export default function RoundSelectScreen({ category, mode, maxItems, onSelect }: Props) {
   const [selected, setSelected] = useState(5)
 
   const ModeIcon = mode === 'camera' ? Camera : Gamepad2
-  const modeName = mode === 'camera' ? 'โหมดกล้อง' : 'โหมดปกติ'
+  const modeName = mode === 'camera' ? 'Camera Mode' : 'Classic Mode'
   const selectedRounds = OPTIONS.find(o => o.value === selected)!.rounds
 
   return (
@@ -38,8 +38,8 @@ export default function RoundSelectScreen({ category, mode, maxItems, onSelect }
             : <span className="text-5xl">{category.emoji}</span>
           }
         </div>
-        <h2 className="text-2xl font-extrabold text-gray-800">เลือกจำนวนไอเทม</h2>
-        <p className="text-gray-500 text-sm mt-1">ผู้รอดจะกลายเป็นแชมเปี้ยน</p>
+        <h2 className="text-2xl font-extrabold text-gray-800">Choose your Items</h2>
+        <p className="text-gray-500 text-sm mt-1">Survive all Rounds to be Champion 🏆</p>
         <div className="flex items-center justify-center gap-1.5 mt-2">
           <ModeIcon size={14} className="text-gray-400" />
           <span className="text-gray-400 text-sm">{category.name} · {modeName}</span>
@@ -77,12 +77,12 @@ export default function RoundSelectScreen({ category, mode, maxItems, onSelect }
                 active ? 'text-white' : 'text-gray-800'
               }`}>{opt.value}</span>
               <span className={`text-sm font-bold ${active ? 'text-indigo-100' : 'text-gray-500'}`}>
-                รายการ
+                Items
               </span>
               <span className={`text-xs text-center leading-snug px-2 mt-0.5 ${
                 active ? 'text-indigo-200' : 'text-gray-400'
               }`}>
-                {disabled ? `ต้องการ ${opt.value} ไอเทม` : opt.desc}
+                {disabled ? `Need ${opt.value}+ Items` : opt.desc}
               </span>
               {active && (
                 <motion.div
@@ -107,7 +107,7 @@ export default function RoundSelectScreen({ category, mode, maxItems, onSelect }
       >
         <span className="text-lg shrink-0">⚔️</span>
         <p className="text-xs text-gray-500 leading-relaxed">
-          ไอเทม 1 ต่อสู้กับไอเทม 2 → ผู้ชนะสู้กับไอเทม 3 → ... → แชมเปี้ยน!
+          Item 1 vs Item 2 → Winner fights Item 3 → ... → Champion!
         </p>
       </motion.div>
 
@@ -120,7 +120,7 @@ export default function RoundSelectScreen({ category, mode, maxItems, onSelect }
         className="w-full py-5 rounded-3xl bg-gray-900 text-white font-extrabold text-lg shadow-lg active:shadow-sm transition-shadow"
         onClick={() => onSelect(selected)}
       >
-        เริ่มเล่น {selectedRounds} รอบ 🏆
+        Start! · {selectedRounds} Rounds 🏆
       </motion.button>
     </div>
   )

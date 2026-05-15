@@ -8,10 +8,10 @@ interface Props {
 }
 
 const MENU_ITEMS = [
-  { icon: FolderOpen, label: 'จัดการหมวดหมู่', action: 'manage', color: 'text-blue-500' },
-  { icon: Globe,      label: 'ภาษา',           action: 'lang',   color: 'text-green-500' },
-  { icon: HelpCircle, label: 'วิธีเล่น',        action: 'howto',  color: 'text-orange-500' },
-  { icon: LogIn,      label: 'เข้าสู่ระบบ',    action: 'login',  color: 'text-purple-500' },
+  { icon: FolderOpen, label: 'Manage Categories', action: 'manage', color: 'text-blue-500' },
+  { icon: Globe,      label: 'Language',          action: 'lang',   color: 'text-green-500' },
+  { icon: HelpCircle, label: 'How to Play',       action: 'howto',  color: 'text-orange-500' },
+  { icon: LogIn,      label: 'Sign In',           action: 'login',  color: 'text-purple-500' },
 ]
 
 export default function Sidebar({ onClose, onManageCategories }: Props) {
@@ -46,7 +46,7 @@ export default function Sidebar({ onClose, onManageCategories }: Props) {
           <button
             className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
             onClick={onClose}
-            aria-label="ปิดเมนู"
+            aria-label="Close"
           >
             <X size={18} />
           </button>
@@ -67,8 +67,8 @@ export default function Sidebar({ onClose, onManageCategories }: Props) {
 
         <div className="p-4 border-t border-gray-100">
           <p className="text-xs text-gray-400 leading-relaxed">
-            หมวดหมู่ที่เพิ่มใหม่จะถูกบันทึกบนอุปกรณ์นี้เท่านั้น
-            หากต้องการบันทึกบน Cloud กรุณาเข้าสู่ระบบก่อน
+            Categories ที่สร้างจะถูก Save ไว้บน Device นี้ก่อน
+            Sign In เพื่อ Sync ข้าม Device ได้เลย
           </p>
         </div>
       </motion.div>
