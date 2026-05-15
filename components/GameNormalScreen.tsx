@@ -7,8 +7,8 @@ interface Props {
   optionA: string
   optionB: string
   categoryName: string
-  pairIndex: number
-  totalPairs: number
+  currentRound: number
+  totalRounds: number
   onChoose: (item: string) => void
   onBack: () => void
 }
@@ -17,8 +17,8 @@ export default function GameNormalScreen({
   optionA,
   optionB,
   categoryName,
-  pairIndex,
-  totalPairs,
+  currentRound,
+  totalRounds,
   onChoose,
   onBack,
 }: Props) {
@@ -33,8 +33,20 @@ export default function GameNormalScreen({
     setTimeout(() => onChoose(side === 'A' ? optionA : optionB), 750)
   }
 
+  const progressPct = ((currentRound - 1) / totalRounds) * 100
+
   return (
     <div className="flex flex-col h-full select-none">
+      {/* Progress bar */}
+      <div className="h-1.5 bg-gray-800 shrink-0 overflow-hidden">
+        <motion.div
+          className="h-full bg-yellow-400"
+          initial={{ width: 0 }}
+          animate={{ width: `${progressPct}%` }}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
+        />
+      </div>
+
       {/* Option A — Red */}
       <motion.div
         className="flex-1 bg-red-500 flex items-center justify-center cursor-pointer relative overflow-hidden"
@@ -55,12 +67,7 @@ export default function GameNormalScreen({
         {ripple?.side === 'A' && (
           <motion.div
             className="absolute rounded-full bg-white/25 pointer-events-none"
-            style={{
-              left: ripple.x - 60,
-              top: ripple.y - 60,
-              width: 120,
-              height: 120,
-            }}
+            style={{ left: ripple.x - 60, top: ripple.y - 60, width: 120, height: 120 }}
             initial={{ scale: 0, opacity: 1 }}
             animate={{ scale: 10, opacity: 0 }}
             transition={{ duration: 0.65 }}
@@ -98,8 +105,8 @@ export default function GameNormalScreen({
           <div className="h-px w-12 bg-gray-600" />
         </div>
 
-        <span className="text-gray-500 text-xs text-right">
-          {pairIndex + 1}/{totalPairs}
+        <span className="text-yellow-400 text-xs font-semibold text-right tabular-nums">
+          รอบที่ {currentRound}/{totalRounds}
         </span>
       </div>
 
@@ -123,12 +130,7 @@ export default function GameNormalScreen({
         {ripple?.side === 'B' && (
           <motion.div
             className="absolute rounded-full bg-white/25 pointer-events-none"
-            style={{
-              left: ripple.x - 60,
-              top: ripple.y - 60,
-              width: 120,
-              height: 120,
-            }}
+            style={{ left: ripple.x - 60, top: ripple.y - 60, width: 120, height: 120 }}
             initial={{ scale: 0, opacity: 1 }}
             animate={{ scale: 10, opacity: 0 }}
             transition={{ duration: 0.65 }}

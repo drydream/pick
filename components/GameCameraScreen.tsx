@@ -6,8 +6,8 @@ import { ArrowLeft, CameraOff } from 'lucide-react'
 interface Props {
   optionA: string
   optionB: string
-  pairIndex: number
-  totalPairs: number
+  currentRound: number
+  totalRounds: number
   onChoose: (item: string) => void
   onBack: () => void
 }
@@ -15,8 +15,8 @@ interface Props {
 export default function GameCameraScreen({
   optionA,
   optionB,
-  pairIndex,
-  totalPairs,
+  currentRound,
+  totalRounds,
   onChoose,
   onBack,
 }: Props) {
@@ -48,7 +48,6 @@ export default function GameCameraScreen({
     }
 
     startCamera()
-
     return () => {
       active = false
       streamRef.current?.getTracks().forEach((t) => t.stop())
@@ -60,6 +59,8 @@ export default function GameCameraScreen({
     setChosen(side)
     setTimeout(() => onChoose(side === 'A' ? optionA : optionB), 750)
   }
+
+  const progressPct = ((currentRound - 1) / totalRounds) * 100
 
   return (
     <div className="relative h-full bg-black overflow-hidden">
@@ -81,11 +82,21 @@ export default function GameCameraScreen({
         </div>
       )}
 
-      {/* dark vignette overlay */}
+      {/* Vignette */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/50 pointer-events-none" />
 
-      {/* Back + counter */}
-      <div className="absolute top-4 left-0 right-0 flex items-center justify-between px-4 z-20">
+      {/* Progress bar */}
+      <div className="absolute top-0 left-0 right-0 h-1.5 bg-white/20 z-30">
+        <motion.div
+          className="h-full bg-yellow-400"
+          initial={{ width: 0 }}
+          animate={{ width: `${progressPct}%` }}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
+        />
+      </div>
+
+      {/* Back + round counter */}
+      <div className="absolute top-3 left-0 right-0 flex items-center justify-between px-4 z-20">
         <button
           className="w-10 h-10 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center"
           onClick={onBack}
@@ -93,8 +104,8 @@ export default function GameCameraScreen({
         >
           <ArrowLeft size={20} className="text-white" />
         </button>
-        <span className="text-white/70 text-sm bg-black/40 backdrop-blur-sm px-3 py-1 rounded-full">
-          {pairIndex + 1}/{totalPairs}
+        <span className="text-white text-sm font-semibold bg-black/50 backdrop-blur-sm px-3 py-1 rounded-full tabular-nums">
+          รอบที่ {currentRound}/{totalRounds}
         </span>
       </div>
 

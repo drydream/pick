@@ -6,4 +6,4 @@ export interface Category {
   isCustom?: boolean
 }
 
-export type Screen = 'home' | 'mode-select' | 'game-normal' | 'game-camera' | 'result'
+export type Screen = 'home' | 'mode-select' | 'round-select' | 'game-normal' | 'game-camera' | 'result'

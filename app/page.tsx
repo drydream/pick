@@ -7,6 +7,7 @@ import TopBar from '@/components/TopBar'
 import Sidebar from '@/components/Sidebar'
 import HomeScreen from '@/components/HomeScreen'
 import ModeSelectScreen from '@/components/ModeSelectScreen'
+import RoundSelectScreen from '@/components/RoundSelectScreen'
 import GameNormalScreen from '@/components/GameNormalScreen'
 import GameCameraScreen from '@/components/GameCameraScreen'
 import ResultScreen from '@/components/ResultScreen'
@@ -26,11 +27,13 @@ export default function Home() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [addCatOpen, setAddCatOpen] = useState(false)
   const [selectedCat, setSelectedCat] = useState<Category | null>(null)
+  const [selectedMode, setSelectedMode] = useState<'normal' | 'camera'>('normal')
   const [pairIndex, setPairIndex] = useState(0)
-  const [chosenItem, setChosenItem] = useState<string | null>(null)
+  const [totalRounds, setTotalRounds] = useState(5)
+  const [currentRound, setCurrentRound] = useState(1)
+  const [choices, setChoices] = useState<string[]>([])
   const [coins, setCoins] = useState(0)
   const [customCats, setCustomCats] = useState<Category[]>([])
-  const [lastMode, setLastMode] = useState<'normal' | 'camera'>('normal')
 
   useEffect(() => {
     try {
@@ -53,23 +56,41 @@ export default function Home() {
   }
 
   const handleModeSelect = (mode: 'normal' | 'camera') => {
-    setLastMode(mode)
-    navigate(mode === 'normal' ? 'game-normal' : 'game-camera')
+    setSelectedMode(mode)
+    navigate('round-select')
+  }
+
+  const handleRoundSelect = (rounds: number) => {
+    setTotalRounds(rounds)
+    setCurrentRound(1)
+    setChoices([])
+    navigate(selectedMode === 'camera' ? 'game-camera' : 'game-normal')
   }
 
   const handleChoose = (item: string) => {
-    setChosenItem(item)
-    const next = coins + 1
-    setCoins(next)
-    try { localStorage.setItem('pick_coins', String(next)) } catch {}
-    navigate('result')
+    const newChoices = [...choices, item]
+    setChoices(newChoices)
+
+    const newCoins = coins + 1
+    setCoins(newCoins)
+    try { localStorage.setItem('pick_coins', String(newCoins)) } catch {}
+
+    if (currentRound >= totalRounds) {
+      navigate('result')
+    } else {
+      const nextRound = currentRound + 1
+      const nextPairIdx = (pairIndex + 1) % (selectedCat?.pairs.length ?? 1)
+      setCurrentRound(nextRound)
+      setPairIndex(nextPairIdx)
+      navigate(selectedMode === 'camera' ? 'game-camera' : 'game-normal')
+    }
   }
 
-  const handleNextPair = () => {
-    if (!selectedCat) return
-    const next = (pairIndex + 1) % selectedCat.pairs.length
-    setPairIndex(next)
-    navigate(lastMode === 'camera' ? 'game-camera' : 'game-normal')
+  const handlePlayAgain = () => {
+    setCurrentRound(1)
+    setChoices([])
+    setPairIndex(0)
+    navigate('round-select', -1)
   }
 
   const handleAddCategory = (cat: Category) => {
@@ -86,11 +107,13 @@ export default function Home() {
   const topBarTitle =
     screen === 'home' ? 'หมวดหมู่' :
     screen === 'mode-select' ? (selectedCat?.name ?? '') :
-    screen === 'result' ? 'ผลลัพธ์' : ''
+    screen === 'round-select' ? 'จำนวนรอบ' :
+    screen === 'result' ? 'ผลการเล่น' : ''
 
   const topBarBack =
     screen === 'home' ? undefined :
     screen === 'mode-select' ? () => navigate('home', -1) :
+    screen === 'round-select' ? () => navigate('mode-select', -1) :
     screen === 'result' ? () => navigate('home', -1) :
     undefined
 
@@ -117,7 +140,7 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      {/* Top bar (hidden during gameplay) */}
+      {/* Top bar — hidden during gameplay */}
       <AnimatePresence>
         {!isGameScreen && (
           <motion.div
@@ -143,11 +166,8 @@ export default function Home() {
           {screen === 'home' && (
             <motion.div
               key="home"
-              custom={dir}
-              variants={slide}
-              initial="enter"
-              animate="center"
-              exit="exit"
+              custom={dir} variants={slide}
+              initial="enter" animate="center" exit="exit"
               transition={{ type: 'tween', duration: 0.28 }}
               className="absolute inset-0 overflow-y-auto"
             >
@@ -158,11 +178,8 @@ export default function Home() {
           {screen === 'mode-select' && selectedCat && (
             <motion.div
               key="mode-select"
-              custom={dir}
-              variants={slide}
-              initial="enter"
-              animate="center"
-              exit="exit"
+              custom={dir} variants={slide}
+              initial="enter" animate="center" exit="exit"
               transition={{ type: 'tween', duration: 0.28 }}
               className="absolute inset-0"
             >
@@ -170,14 +187,27 @@ export default function Home() {
             </motion.div>
           )}
 
+          {screen === 'round-select' && selectedCat && (
+            <motion.div
+              key="round-select"
+              custom={dir} variants={slide}
+              initial="enter" animate="center" exit="exit"
+              transition={{ type: 'tween', duration: 0.28 }}
+              className="absolute inset-0"
+            >
+              <RoundSelectScreen
+                category={selectedCat}
+                mode={selectedMode}
+                onSelect={handleRoundSelect}
+              />
+            </motion.div>
+          )}
+
           {screen === 'game-normal' && currentPair && (
             <motion.div
-              key={`game-normal-${pairIndex}`}
-              custom={dir}
-              variants={slide}
-              initial="enter"
-              animate="center"
-              exit="exit"
+              key={`game-normal-${currentRound}`}
+              custom={dir} variants={slide}
+              initial="enter" animate="center" exit="exit"
               transition={{ type: 'tween', duration: 0.28 }}
               className="absolute inset-0"
             >
@@ -185,52 +215,47 @@ export default function Home() {
                 optionA={currentPair[0]}
                 optionB={currentPair[1]}
                 categoryName={selectedCat?.name ?? ''}
-                pairIndex={pairIndex}
-                totalPairs={selectedCat?.pairs.length ?? 1}
+                currentRound={currentRound}
+                totalRounds={totalRounds}
                 onChoose={handleChoose}
-                onBack={() => navigate('mode-select', -1)}
+                onBack={() => navigate('round-select', -1)}
               />
             </motion.div>
           )}
 
           {screen === 'game-camera' && currentPair && (
             <motion.div
-              key={`game-camera-${pairIndex}`}
-              custom={dir}
-              variants={slide}
-              initial="enter"
-              animate="center"
-              exit="exit"
+              key={`game-camera-${currentRound}`}
+              custom={dir} variants={slide}
+              initial="enter" animate="center" exit="exit"
               transition={{ type: 'tween', duration: 0.28 }}
               className="absolute inset-0"
             >
               <GameCameraScreen
                 optionA={currentPair[0]}
                 optionB={currentPair[1]}
-                pairIndex={pairIndex}
-                totalPairs={selectedCat?.pairs.length ?? 1}
+                currentRound={currentRound}
+                totalRounds={totalRounds}
                 onChoose={handleChoose}
-                onBack={() => navigate('mode-select', -1)}
+                onBack={() => navigate('round-select', -1)}
               />
             </motion.div>
           )}
 
-          {screen === 'result' && chosenItem && selectedCat && (
+          {screen === 'result' && choices.length > 0 && selectedCat && (
             <motion.div
               key="result"
-              custom={dir}
-              variants={slide}
-              initial="enter"
-              animate="center"
-              exit="exit"
+              custom={dir} variants={slide}
+              initial="enter" animate="center" exit="exit"
               transition={{ type: 'tween', duration: 0.28 }}
               className="absolute inset-0"
             >
               <ResultScreen
-                chosenItem={chosenItem}
+                choices={choices}
+                totalRounds={totalRounds}
                 category={selectedCat}
-                onPlayAgain={() => navigate('home', -1)}
-                onNextPair={handleNextPair}
+                onPlayAgain={handlePlayAgain}
+                onGoHome={() => navigate('home', -1)}
               />
             </motion.div>
           )}
