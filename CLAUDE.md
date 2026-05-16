@@ -64,3 +64,10 @@ git push origin main
 |---------|--------|-------------|
 | v1.0.0 | main | Initial release — home, sidebar, mode select, normal game, camera game, result, add category |
 | v1.1.0 | v1.1.0 | Round selection (5 or 10 rounds), multi-round game loop, progress bar, winner summary |
+| v1.2.0 | v1.2.0 | Survivor/tournament game logic — currentWinner vs nextChallenger, per-half entrance animations |
+| v1.3.0 | v1.3.0 | Item images (picsum with English seeds), color-follows-winner (red/blue tag sticks with item) |
+| v1.4.0 | v1.4.0 | Individual item list + image uploads in AddCategory, ManageCategoriesScreen (edit/delete), icon upload |
+| v1.4.1 | v1.4.1 | Thai-English mixed UI language across all components |
+| v1.4.2 | v1.4.2 | Camera mode redesign — portrait cards at bottom corners, VS badge, floating names |
+| v1.4.3 | v1.4.3 | Landing screen as app entry point |
+| v1.5.0 | v1.5.0 | Admin system — login, dashboard, manage public requests (approve/reject), manage all categories; privacy notice updated; "Request to Go Public" submits to localStorage queue |

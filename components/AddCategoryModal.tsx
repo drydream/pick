@@ -1,8 +1,9 @@
 'use client'
 import { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronLeft, Plus, Trash2, Upload, ImagePlus, AlertCircle, Send } from 'lucide-react'
+import { ChevronLeft, Plus, Trash2, Upload, ImagePlus, AlertCircle, Send, CheckCircle } from 'lucide-react'
 import { Category } from '@/lib/types'
+import { addRequest } from '@/lib/requests'
 
 const PRESET_EMOJIS = [
   '🎮', '🍕', '🎵', '🏆', '🌟', '❤️', '🎯', '🚀', '🌈', '🎪',
@@ -52,6 +53,7 @@ export default function AddCategoryModal({ editCategory, onClose, onAdd }: Props
     return Array.from({ length: 6 }, (_, i) => ({ id: `n${i}`, name: '', imageDataUrl: '' }))
   })
   const [showSubmitDetail, setShowSubmitDetail] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
   const [errors, setErrors] = useState<string[]>([])
 
   const iconInputRef = useRef<HTMLInputElement>(null)
@@ -91,24 +93,37 @@ export default function AddCategoryModal({ editCategory, onClose, onAdd }: Props
 
   const filledItems = items.filter(it => it.name.trim())
 
+  const buildCategory = (): Category => ({
+    id: editCategory?.id ?? `custom_${Date.now()}`,
+    name: catName.trim(),
+    emoji: selectedEmoji,
+    iconDataUrl: iconDataUrl || undefined,
+    pairs: [],
+    items: filledItems.map(it => ({
+      name: it.name.trim(),
+      imageDataUrl: it.imageDataUrl || undefined,
+    })),
+    isCustom: true,
+  })
+
+  const handleRequestPublic = () => {
+    const errs: string[] = []
+    if (!catName.trim()) errs.push('Category name is required')
+    if (filledItems.length < 6) errs.push(`ต้องมีอย่างน้อย 6 Items (ตอนนี้มี ${filledItems.length})`)
+    if (errs.length) { setErrors(errs); return }
+    setErrors([])
+    addRequest(buildCategory())
+    setSubmitted(true)
+    setShowSubmitDetail(false)
+  }
+
   const handleSave = () => {
     const errs: string[] = []
     if (!catName.trim()) errs.push('Category name is required')
     if (filledItems.length < 6) errs.push(`ต้องมีอย่างน้อย 6 Items (ตอนนี้มี ${filledItems.length})`)
     if (errs.length) { setErrors(errs); return }
     setErrors([])
-    onAdd({
-      id: editCategory?.id ?? `custom_${Date.now()}`,
-      name: catName.trim(),
-      emoji: selectedEmoji,
-      iconDataUrl: iconDataUrl || undefined,
-      pairs: [],
-      items: filledItems.map(it => ({
-        name: it.name.trim(),
-        imageDataUrl: it.imageDataUrl || undefined,
-      })),
-      isCustom: true,
-    })
+    onAdd(buildCategory())
   }
 
   return (
@@ -250,31 +265,52 @@ export default function AddCategoryModal({ editCategory, onClose, onAdd }: Props
         </AnimatePresence>
 
         {/* ── Privacy notice ──────────────────────────── */}
-        <div className="bg-blue-50 rounded-2xl px-4 py-3">
-          <p className="text-blue-700 text-xs leading-relaxed">
-            🔒 ข้อมูลจะถูก Save ไว้บนเครื่องและ Account ของคุณเท่านั้น
-            ไม่ได้ขึ้น Public Server
+        <div className="bg-blue-50 rounded-2xl px-4 py-3 space-y-1.5">
+          <p className="text-blue-700 text-xs leading-relaxed font-semibold">
+            🔒 ข้อมูลจะถูก Save ไว้บนเครื่องและ Account ของคุณเท่านั้น ไม่ได้ขึ้น Public Server
+          </p>
+          <p className="text-blue-600/80 text-xs leading-relaxed">
+            ถ้าต้องการจะนำขึ้น Server จำเป็นต้องทำการส่งและรอการยืนยันตรวจสอบจาก Admin ก่อน
           </p>
         </div>
 
         {/* ── Submit to server ────────────────────────── */}
         <div className="space-y-2 pb-3">
-          <button onClick={() => setShowSubmitDetail(v => !v)}
-            className="w-full py-3 rounded-2xl border-2 border-gray-200 text-gray-600 text-sm font-bold flex items-center justify-center gap-2">
-            <Send size={14} />Request to Go Public
-          </button>
-          <AnimatePresence>
-            {showSubmitDetail && (
-              <motion.p
-                initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="text-xs text-gray-500 text-center leading-relaxed overflow-hidden"
+          {submitted ? (
+            <div className="w-full py-3 rounded-2xl bg-green-50 border-2 border-green-200 flex items-center justify-center gap-2">
+              <CheckCircle size={16} className="text-green-500" />
+              <span className="text-green-700 text-sm font-bold">ส่งคำขอเรียบร้อยแล้ว! รอ Admin Review นะ 🎉</span>
+            </div>
+          ) : (
+            <>
+              <button
+                onClick={() => setShowSubmitDetail(v => !v)}
+                className="w-full py-3 rounded-2xl border-2 border-gray-200 text-gray-600 text-sm font-bold flex items-center justify-center gap-2"
               >
-                ข้อมูลจะผ่านการ Review โดย Admin ก่อน
-                เพื่อ Block เนื้อหาที่ไม่เหมาะสมหรือผิดกฎหมาย
-              </motion.p>
-            )}
-          </AnimatePresence>
+                <Send size={14} />Request to Go Public
+              </button>
+              <AnimatePresence>
+                {showSubmitDetail && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="overflow-hidden space-y-2"
+                  >
+                    <p className="text-xs text-gray-500 text-center leading-relaxed px-2">
+                      Category จะถูกส่งให้ Admin Review ก่อน Public
+                      เพื่อ Block เนื้อหาที่ไม่เหมาะสมหรือผิดกฎหมาย
+                    </p>
+                    <button
+                      onClick={handleRequestPublic}
+                      className="w-full py-3 rounded-2xl bg-indigo-500 text-white text-sm font-extrabold flex items-center justify-center gap-2 active:scale-95 transition-transform"
+                    >
+                      <Send size={14} />ยืนยัน — ส่งคำขอ
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </>
+          )}
         </div>
       </div>
 
