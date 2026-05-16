@@ -7,7 +7,7 @@ import { isAdminAuthenticated } from '@/lib/adminAuth'
 import { DEFAULT_CATEGORIES } from '@/lib/data'
 import { Category } from '@/lib/types'
 import { getRequests } from '@/lib/requests'
-import { ArrowLeft, Trash2, Search, Pencil, Plus, X, Check } from 'lucide-react'
+import { ArrowLeft, Trash2, Search, Pencil, Plus, X, Check, ImagePlus } from 'lucide-react'
 
 const PRESET_EMOJIS = [
   '🎮', '🍕', '🎵', '🏆', '🌟', '❤️', '🎯', '🚀', '🌈', '🎪',
@@ -16,10 +16,24 @@ const PRESET_EMOJIS = [
   '🎤', '🎬', '🏖️', '🗺️', '🌮',
 ]
 
+const compressImage = (dataUrl: string, maxDim = 480, quality = 0.78): Promise<string> =>
+  new Promise(resolve => {
+    const img = new Image()
+    img.onload = () => {
+      const ratio = Math.min(maxDim / img.width, maxDim / img.height, 1)
+      const canvas = document.createElement('canvas')
+      canvas.width = Math.round(img.width * ratio)
+      canvas.height = Math.round(img.height * ratio)
+      canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height)
+      resolve(canvas.toDataURL('image/jpeg', quality))
+    }
+    img.src = dataUrl
+  })
+
 type CatType = 'default' | 'approved' | 'custom'
 type CatWithType = Category & { _type: CatType }
 
-interface EditItem { id: string; name: string }
+interface EditItem { id: string; name: string; imageDataUrl: string }
 interface EditState {
   original: CatWithType
   name: string
@@ -72,8 +86,8 @@ export default function AdminCategoriesPage() {
 
   const startEdit = (cat: CatWithType) => {
     const items: EditItem[] = cat.items
-      ? cat.items.map((it, i) => ({ id: `i${i}`, name: it.name }))
-      : cat.pairs.flat().map((name, i) => ({ id: `p${i}`, name }))
+      ? cat.items.map((it, i) => ({ id: `i${i}`, name: it.name, imageDataUrl: it.imageDataUrl ?? '' }))
+      : cat.pairs.flat().map((name, i) => ({ id: `p${i}`, name, imageDataUrl: '' }))
     setEditing({ original: cat, name: cat.name, emoji: cat.emoji, items })
   }
 
@@ -85,7 +99,9 @@ export default function AdminCategoriesPage() {
       name: editing.name.trim() || editing.original.name,
       emoji: editing.emoji,
       pairs: [],
-      items: editing.items.filter(i => i.name.trim()).map(i => ({ name: i.name.trim() })),
+      items: editing.items
+        .filter(i => i.name.trim())
+        .map(i => ({ name: i.name.trim(), imageDataUrl: i.imageDataUrl || undefined })),
       isCustom: true,
     }
     const existing = loadCustomCats()
@@ -105,6 +121,18 @@ export default function AdminCategoriesPage() {
 
   const updateEditItems = (fn: (items: EditItem[]) => EditItem[]) =>
     setEditing(prev => prev ? { ...prev, items: fn(prev.items) } : prev)
+
+  const handleItemImageUpload = async (id: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = async ev => {
+      const compressed = await compressImage(ev.target?.result as string, 480)
+      updateEditItems(items => items.map(i => i.id === id ? { ...i, imageDataUrl: compressed } : i))
+    }
+    reader.readAsDataURL(file)
+    e.target.value = ''
+  }
 
   return (
     <div className="h-full flex flex-col bg-gray-50 relative overflow-hidden">
@@ -135,7 +163,6 @@ export default function AdminCategoriesPage() {
         {filtered.map(cat => {
           const itemCount = cat.items?.length ?? cat.pairs.flat().length
           const isDeleting = deletingId === cat.id
-
           return (
             <div key={cat.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm px-4 py-3">
               <div className="flex items-center gap-3">
@@ -178,15 +205,11 @@ export default function AdminCategoriesPage() {
               )}
 
               <div className="mt-2 flex flex-wrap gap-1">
-                {(cat.items
-                  ? cat.items.slice(0, 5).map(i => i.name)
-                  : cat.pairs.flat().slice(0, 5)
-                ).map((name, i) => (
-                  <span key={i} className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-lg">{name}</span>
-                ))}
-                {itemCount > 5 && (
-                  <span className="text-xs text-gray-400 px-1 py-0.5">+{itemCount - 5} more</span>
-                )}
+                {(cat.items ? cat.items.slice(0, 5).map(i => i.name) : cat.pairs.flat().slice(0, 5))
+                  .map((name, i) => (
+                    <span key={i} className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-lg">{name}</span>
+                  ))}
+                {itemCount > 5 && <span className="text-xs text-gray-400 px-1 py-0.5">+{itemCount - 5} more</span>}
               </div>
             </div>
           )
@@ -257,31 +280,54 @@ export default function AdminCategoriesPage() {
                     {editing.items.filter(i => i.name.trim()).length} items
                   </span>
                 </div>
+
                 <div className="space-y-2">
-                  {editing.items.map((item, idx) => (
-                    <div key={item.id} className="flex items-center gap-2">
-                      <span className="w-6 text-xs text-gray-400 text-right shrink-0">{idx + 1}.</span>
-                      <input
-                        type="text"
-                        value={item.name}
-                        onChange={e => updateEditItems(items =>
-                          items.map(i => i.id === item.id ? { ...i, name: e.target.value } : i)
-                        )}
-                        placeholder={`Item ${idx + 1}`}
-                        className="flex-1 border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                      />
-                      <button
-                        onClick={() => updateEditItems(items => items.filter(i => i.id !== item.id))}
-                        className="w-9 h-9 rounded-xl bg-red-50 flex items-center justify-center shrink-0">
-                        <Trash2 size={14} className="text-red-400" />
-                      </button>
-                    </div>
-                  ))}
+                  {editing.items.map((item, idx) => {
+                    const inputId = `admin-img-${item.id}`
+                    return (
+                      <div key={item.id} className="flex items-center gap-2">
+                        {/* Image upload */}
+                        <label htmlFor={inputId}
+                          className="w-12 h-12 rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center shrink-0 cursor-pointer bg-gray-50 overflow-hidden">
+                          {item.imageDataUrl
+                            ? <img src={item.imageDataUrl} className="w-full h-full object-cover" alt="" />
+                            : <ImagePlus size={15} className="text-gray-400" />
+                          }
+                          <input
+                            id={inputId}
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={e => handleItemImageUpload(item.id, e)}
+                          />
+                        </label>
+
+                        {/* Name input */}
+                        <input
+                          type="text"
+                          value={item.name}
+                          onChange={e => updateEditItems(items =>
+                            items.map(i => i.id === item.id ? { ...i, name: e.target.value } : i)
+                          )}
+                          placeholder={`Item ${idx + 1}`}
+                          className="flex-1 border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                        />
+
+                        {/* Delete */}
+                        <button
+                          onClick={() => updateEditItems(items => items.filter(i => i.id !== item.id))}
+                          className="w-9 h-9 rounded-xl bg-red-50 flex items-center justify-center shrink-0">
+                          <Trash2 size={14} className="text-red-400" />
+                        </button>
+                      </div>
+                    )
+                  })}
                 </div>
+
                 <button
                   onClick={() => updateEditItems(items => [
                     ...items,
-                    { id: `new_${Date.now()}`, name: '' },
+                    { id: `new_${Date.now()}`, name: '', imageDataUrl: '' },
                   ])}
                   className="w-full py-2.5 mt-3 border-2 border-dashed border-indigo-200 rounded-xl text-indigo-500 text-sm font-semibold flex items-center justify-center gap-1.5"
                 >
