@@ -167,7 +167,10 @@ export default function Home() {
 
   // ── Derived ────────────────────────────────────────────────────────
 
-  const allCategories = [...DEFAULT_CATEGORIES, ...customCats]
+  const allCategories = [
+    ...DEFAULT_CATEGORIES.filter(d => !customCats.find(c => c.id === d.id)),
+    ...customCats,
+  ]
   const isGameScreen  = GAME_SCREENS.includes(screen)
   const showTopBar    = !NO_TOPBAR_SCREENS.includes(screen)
 
